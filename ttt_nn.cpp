@@ -1,0 +1,91 @@
+#include "ttt_nn.hpp"
+
+TicTacToeNN::TicTacToeNN () {
+	const int n_chan = 3;
+	const double drop = 0.3;
+	const int action_size = 9;
+	const int flat_size = action_size * n_chan;
+
+	conv1 = register_module("conv1", torch::nn::Conv2d(torch::nn::Conv2dOptions(1, n_chan, 3).padding(1)));
+	bn1 = register_module("bn1", torch::nn::BatchNorm2d(n_chan));
+
+	conv2 = register_module("conv2", torch::nn::Conv2d(torch::nn::Conv2dOptions(n_chan, n_chan, 3).padding(1)));
+	bn2 = register_module("bn2", torch::nn::BatchNorm2d(n_chan));
+
+	conv3 = register_module("conv3", torch::nn::Conv2d(torch::nn::Conv2dOptions(n_chan, n_chan, 3).padding(1)));
+	bn3 = register_module("bn3", torch::nn::BatchNorm2d(n_chan));
+
+	conv4 = register_module("conv4", torch::nn::Conv2d(torch::nn::Conv2dOptions(n_chan, n_chan, 3).padding(1)));
+	bn4 = register_module("bn4", torch::nn::BatchNorm2d(n_chan));
+
+	fc1 = register_module("fc1", torch::nn::Linear(flat_size, 1024));
+	ln_fc1 = register_module("ln_fc1",
+				torch::nn::LayerNorm(torch::nn::LayerNormOptions({ 1024 }))
+			);
+
+	fc2 = register_module("fc2", torch::nn::Linear(1024, 512));
+	ln_fc2 = register_module("ln_fc2",
+				torch::nn::LayerNorm(torch::nn::LayerNormOptions({ 512 }))
+			);
+
+	dropout = register_module("dropout",
+				torch::nn::Dropout(torch::nn::DropoutOptions(drop))
+			);
+
+	pi_head = register_module("pi", torch::nn::Linear(512, action_size));
+	v_head = register_module("v", torch::nn::Linear(512, 1));
+}
+
+void TicTacToeNN::train (std::vector<Example> examples) {
+	const double learning_rate = 0.001;
+
+	torch::optim::Adam optimizer(
+		this->parameters(),
+		torch::optim::AdamOptions(learning_rate)
+	);
+
+	auto policy_loss = torch::nn::CrossEntropyLoss();
+	auto value_loss = torch::nn::MSELoss();
+
+	for (size_t i = 0; i < examples.size(); i++) {
+		auto [ game, target_pi, target_v ] = examples[i];
+		auto [ pred_pi, pred_v ] = predict(game);
+		auto l_pi = policy_loss(pred_pi, target_pi);
+		auto l_v = value_loss(pred_v, target_v);
+
+		auto loss = l_pi + l_v;
+		optimizer.zero_grad();
+		loss.backward();
+		optimizer.step();
+	}
+}
+
+std::pair<torch::Tensor, torch::Tensor> TicTacToeNN::predict (Game* abstract) {
+	TicTacToeState* g = (TicTacToeState*)abstract;
+	auto x = torch::from_blob(
+				g->board.data(),
+				{ 1, 3, 3 },
+				torch::kFloat32
+			).clone();
+
+	x = x.unsqueeze(1);
+	x = torch::relu(bn1(conv1(x)));
+	x = torch::relu(bn2(conv2(x)));
+	x = torch::relu(bn3(conv3(x)));
+	x = torch::relu(bn4(conv4(x)));
+
+	x = x.view({ x.size(0), -1 });
+
+	x = dropout(torch::relu(ln_fc1(fc1(x))));
+	x = dropout(torch::relu(ln_fc2(fc2(x))));
+
+	torch::Tensor pi = torch::softmax(pi_head(x), 1);
+	torch::Tensor v = torch::tanh(v_head(x));
+
+	return { pi, v };
+}
+
+void TicTacToeNN::save (std::string path) {}
+
+void TicTacToeNN::load (std::string path) {}
+
