@@ -36,7 +36,7 @@ TicTacToeNN::TicTacToeNN () {
 	v_head = register_module("v", torch::nn::Linear(512, 1));
 }
 
-void TicTacToeNN::train (std::vector<Example> examples) {
+void TicTacToeNN::feed (std::vector<Example> examples) {
 	const double learning_rate = 0.001;
 
 	torch::optim::Adam optimizer(
@@ -44,16 +44,16 @@ void TicTacToeNN::train (std::vector<Example> examples) {
 		torch::optim::AdamOptions(learning_rate)
 	);
 
-	auto policy_loss = torch::nn::CrossEntropyLoss();
-	auto value_loss = torch::nn::MSELoss();
-
 	for (size_t i = 0; i < examples.size(); i++) {
 		auto [ game, target_pi, target_v ] = examples[i];
 		auto [ pred_pi, pred_v ] = predict(game);
-		auto l_pi = policy_loss(pred_pi, target_pi);
-		auto l_v = value_loss(pred_v, target_v);
+
+		this->train();
+		auto l_pi = -(target_pi * torch::log(pred_pi + 1e-8)).sum(1).mean();
+		auto l_v = torch::mse_loss(pred_v, target_v);
 
 		auto loss = l_pi + l_v;
+
 		optimizer.zero_grad();
 		loss.backward();
 		optimizer.step();
@@ -61,6 +61,8 @@ void TicTacToeNN::train (std::vector<Example> examples) {
 }
 
 std::pair<torch::Tensor, torch::Tensor> TicTacToeNN::predict (Game* abstract) {
+	this->eval();
+
 	TicTacToeState* g = (TicTacToeState*)abstract;
 	auto x = torch::from_blob(
 				g->board.data(),

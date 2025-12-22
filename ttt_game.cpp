@@ -74,8 +74,9 @@ std::string TicTacToeState::to_string () {
 
 Game* TicTacToeState::get_next_state (size_t action) {
 	TicTacToeState* new_state = new TicTacToeState();
+	new_state->board = board;
 	new_state->board[action] = player;
-	new_state->player = new_state->other_player();
+	new_state->player = other_player();
 	return new_state;
 }
 

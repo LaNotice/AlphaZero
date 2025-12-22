@@ -21,12 +21,12 @@ struct MCTS {
 	std::map<GameString, double> game_ended; 
 	std::map<GameString, std::vector<float>> valid_moves;
 	std::map<GameString, torch::Tensor> policies;
-	Game* initial = nullptr;
 	NeuralNetwork* neural_network = nullptr;
 
-	MCTS (Game* g, NeuralNetwork* nnet);
+	MCTS (NeuralNetwork* nnet);
 	torch::Tensor get_action_prob (Game* g, int temp = 1);
 	torch::Tensor search (Game* g);
+	~MCTS ();
 };
 
 #endif
