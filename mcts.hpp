@@ -26,7 +26,6 @@ struct MCTS {
 	MCTS (NeuralNetwork* nnet);
 	torch::Tensor get_action_prob (Game* g, int temp = 1);
 	torch::Tensor search (Game* g);
-	~MCTS ();
 };
 
 #endif

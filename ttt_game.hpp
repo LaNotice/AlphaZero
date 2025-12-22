@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <string>
+#include <cassert>
 
 #include "game.hpp"
 

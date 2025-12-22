@@ -47,7 +47,7 @@ void PlayTTT::input () {
 	if (IsKeyPressed(KEY_F)) {
 		std::cout << gstate->to_string() << std::endl;
 		std::cout << gstate << " " << mcts << " " << nn << std::endl;
-		auto pi = mcts->get_action_prob(gstate);
+		auto pi = mcts->get_action_prob(gstate, 1);
 		std::cout << pi << std::endl;
 		int pick = pi.argmax().item<int>();
 		std::cout << "choice is " << pick << std::endl;

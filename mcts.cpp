@@ -8,8 +8,17 @@ torch::Tensor MCTS::get_action_prob (Game* g, int temp) {
 	const int num_sims = 3;
 
 	for (size_t i = 0; i < num_sims; i++) {
+		std::cout << times_edge_visited << std::endl;
+		std::cout << times_state_visited << std::endl;
 		search(g);
 	}
+
+	auto possible_actions = g->get_possible_moves();
+	torch::Tensor moves = torch::from_blob(
+				possible_actions.data(),
+				{ 9 },
+				torch::kFloat32
+			).clone();
 
 	// weighted actions
 	std::string str = g->to_string();
@@ -40,7 +49,7 @@ torch::Tensor MCTS::get_action_prob (Game* g, int temp) {
 					counts.data(),
 					{ 9 },
 					torch::kFloat32
-				).clone();
+				).clone() * moves;
 	}
 
 	sum = 0;
@@ -56,7 +65,7 @@ torch::Tensor MCTS::get_action_prob (Game* g, int temp) {
 				counts.data(),
 				{ 9 },
 				torch::kFloat32
-			);
+			) * moves;
 }
 
 torch::Tensor MCTS::search (Game* g) {
@@ -90,18 +99,19 @@ torch::Tensor MCTS::search (Game* g) {
 
 	auto all_moves = g->get_possible_moves();
 	auto cur_valid_moves = torch::from_blob(
-				valid_moves[str].data(),
+				all_moves.data(),
 				{ 9 },
 				torch::kFloat32
 			).clone();
 	float cur_best = -99999.9f;
+	bool smallest = true;
 	size_t best_act = 0;
 
 	auto data = cur_valid_moves.data_ptr<float>();
 	auto n = cur_valid_moves.numel();
 	std::cout << "ouin" << std::endl;
 	for (size_t i = 0; i < n; i++) {
-		if (data[i] <= 0) {
+		if (data[i] <= 0.f) {
 			continue;
 		}
 
@@ -114,13 +124,16 @@ torch::Tensor MCTS::search (Game* g) {
 			u = cpu_ct * pol_values[i] * sqrt((double)times_state_visited[str] + EPS);
 		}
 
-		if (u > cur_best) {
+		if (u > cur_best || smallest) {
 			cur_best = u;
 			best_act = i;
+			smallest = false;
 		}
 	}
 
 	std::cout << "nexty" << std::endl;
+	std::cout << cur_valid_moves << std::endl;
+	std::cout << cur_best << " " << best_act << std::endl;
 	Game* next = g->get_next_state(best_act);
 	auto v = search(next);
 	delete next;
@@ -135,6 +148,3 @@ torch::Tensor MCTS::search (Game* g) {
 	return -v;
 }
 
-MCTS::~MCTS () {
-	std::cout << "deleted" << std::endl;
-}

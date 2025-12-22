@@ -15,7 +15,7 @@ std::vector<float> TicTacToeState::get_possible_moves () {
 	moves.reserve(9);
 	for (size_t i = 0; i < board.size(); i++) {
 		if (board[i] != MARK::NONE) {
-			moves.push_back(.0f);
+			moves.push_back(0.f);
 		} else {
 			moves.push_back(1.f);
 		}
@@ -73,6 +73,7 @@ std::string TicTacToeState::to_string () {
 }
 
 Game* TicTacToeState::get_next_state (size_t action) {
+	assert(board[action] == MARK::NONE);
 	TicTacToeState* new_state = new TicTacToeState();
 	new_state->board = board;
 	new_state->board[action] = player;
