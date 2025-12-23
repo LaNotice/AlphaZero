@@ -1,7 +1,13 @@
 #include "ttt_play.hpp"
 
-PlayTTT::PlayTTT () {
+PlayTTT::PlayTTT (std::string model_path) {
 	nn = new TicTacToeNN();
+	torch::serialize::InputArchive input;
+	if (model_path != "") {
+		input.load_from(model_path);
+		nn->load(input);
+	}
+
 	gstate = new TicTacToeState();
 	mcts = new MCTS(nn);
 

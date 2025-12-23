@@ -87,7 +87,7 @@ std::pair<torch::Tensor, torch::Tensor> TicTacToeNN::predict (Game* abstract) {
 	return { pi, v };
 }
 
-void TicTacToeNN::save (std::string path) {}
-
-void TicTacToeNN::load (std::string path) {}
+TicTacToeNN* TicTacToeNN::clone () const {
+	return new TicTacToeNN(*this);
+}
 

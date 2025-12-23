@@ -6,7 +6,7 @@
 #include "neural_network.hpp"
 #include "ttt_game.hpp"
 
-struct TicTacToeNN : public NeuralNetwork, torch::nn::Module {
+struct TicTacToeNN : public NeuralNetwork {
 	torch::nn::Conv2d conv1{nullptr}, conv2{nullptr}, conv3{nullptr}, conv4{nullptr};
 	torch::nn::BatchNorm2d bn1{nullptr}, bn2{nullptr}, bn3{nullptr}, bn4{nullptr};
 
@@ -21,8 +21,7 @@ struct TicTacToeNN : public NeuralNetwork, torch::nn::Module {
 
 	virtual void feed (std::vector<Example> examples);
 	virtual std::pair<torch::Tensor, torch::Tensor> predict (Game* g);
-	virtual void save (std::string path);
-	virtual void load (std::string path);
+	TicTacToeNN* clone () const;
 };
 
 #endif

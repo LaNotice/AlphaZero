@@ -8,8 +8,6 @@ torch::Tensor MCTS::get_action_prob (Game* g, int temp) {
 	const int num_sims = 3;
 
 	for (size_t i = 0; i < num_sims; i++) {
-		std::cout << times_edge_visited << std::endl;
-		std::cout << times_state_visited << std::endl;
 		search(g);
 	}
 
@@ -25,7 +23,6 @@ torch::Tensor MCTS::get_action_prob (Game* g, int temp) {
 	std::vector<float> counts;
 	counts.reserve(g->get_action_size());
 	float sum = 0;
-	std::cout << "else" << std::endl;
 	for (size_t i = 0; i < g->get_action_size(); i++) {
 		auto pair = std::pair<GameString, size_t>(str, i);
 		if (times_edge_visited.find(pair) != times_edge_visited.end()) {
@@ -72,7 +69,6 @@ torch::Tensor MCTS::search (Game* g) {
 	double cpu_ct = 1;
 	std::string str = g->to_string();
 
-	std::cout << "searchy" << std::endl;
 	if (game_ended.find(str) == game_ended.end()) {
 		game_ended[str] = g->is_game_ended();
 	} else if (game_ended[str]) {
@@ -82,7 +78,6 @@ torch::Tensor MCTS::search (Game* g) {
 
 	if (policies.find(str) == policies.end()) {
 		// leaf node
-		std::cout << "\tleafy" << std::endl;
 		auto [ pi, v ] = neural_network->predict(g);
 		auto possible_moves = g->get_possible_moves();
 
@@ -109,7 +104,6 @@ torch::Tensor MCTS::search (Game* g) {
 
 	auto data = cur_valid_moves.data_ptr<float>();
 	auto n = cur_valid_moves.numel();
-	std::cout << "ouin" << std::endl;
 	for (size_t i = 0; i < n; i++) {
 		if (data[i] <= 0.f) {
 			continue;
@@ -131,9 +125,6 @@ torch::Tensor MCTS::search (Game* g) {
 		}
 	}
 
-	std::cout << "nexty" << std::endl;
-	std::cout << cur_valid_moves << std::endl;
-	std::cout << cur_best << " " << best_act << std::endl;
 	Game* next = g->get_next_state(best_act);
 	auto v = search(next);
 	delete next;

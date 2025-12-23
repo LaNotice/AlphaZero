@@ -14,7 +14,7 @@ struct PlayTTT : public Play {
 	TicTacToeNN* nn;
 	bool quit = false;
 
-	PlayTTT ();
+	PlayTTT (std::string model_path = "");
 
 	virtual void display ();
 	virtual void input ();
