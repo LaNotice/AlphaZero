@@ -8,15 +8,15 @@ Arena::Arena (Game* game, NeuralNetwork* a) {
 	mcts_b = new MCTS(nn_b);
 }
 
-// using Example = std::tuple<Game*, torch::Tensor, torch::Tensor>;
-std::vector<Example> Arena::episode (bool starting_player) {
+std::vector<Example> Arena::episode (int starting_player) {
 	Game* curgame = g;
 	std::vector<Example> data;
+	int original_starter = starting_player;
 	int step = 0;
 	while (true) {
 		step++;
 		torch::Tensor pi;
-		if (starting_player) {
+		if (starting_player == 1) {
 			pi = mcts_a->get_action_prob(curgame);
 		} else {
 			pi = mcts_b->get_action_prob(curgame);
@@ -28,30 +28,32 @@ std::vector<Example> Arena::episode (bool starting_player) {
 		int pick = pi.argmax().item<int>();
 		Game* next_state = curgame->get_next_state(pick);
 		curgame = next_state;
-		starting_player = !starting_player;
+		starting_player *= starting_player;
 
-		if (curgame->is_game_ended() != 0.) {
+		if (curgame->is_game_ended() != 0.0) {
 			break;
 		}
 	}
 
-	double game_result = curgame->is_game_ended();
+//	std::cout << "FINAL STATE" << std::endl;
+//	std::cout << curgame->to_string() << std::endl;
+//	std::cout << "===============" << std::endl;
+
+	double game_result = curgame->is_game_ended() * starting_player;
 	for (size_t i = 0; i < data.size(); i++) {
-		if (i % 2 == 0) {
-			if (starting_player) {
-				// circle = a
-				std::get<2>(data[i]) = torch::tensor({ (float)game_result }, { torch::kFloat32 });
-			} else {
-				// circle = b
-				std::get<2>(data[i]) = torch::tensor({ (float)game_result * -1.0 }, { torch::kFloat32 });
-			}
+		double perspective = 0.0;
+		if (original_starter == 1) {
+			perspective = (i % 2 == 0) ? 1.0 : -1.0;
 		} else {
-			if (starting_player) {
-				std::get<2>(data[i]) = torch::tensor({ (float)game_result * -1.0 }, { torch::kFloat32 });
-			} else {
-				std::get<2>(data[i]) = torch::tensor({ (float)game_result }, { torch::kFloat32 });
-			}
+			perspective = (i % 2 == 0) ? -1.0: 1.0;
 		}
+		float outcome = perspective * game_result;
+		// float v = game_result * pow(-1, starting_player * (i % 2 == 0));
+		auto new_v = torch::tensor({ outcome }, { torch::kFloat32 });
+		std::get<2>(data[i]) = new_v;
+//		std::cout << std::get<0>(data[i])->to_string() << std::endl;	
+//		std::cout << "value " << v << "/" << new_v << std::endl;
+//		std::cout << "vs result " << game_result << std::endl;
 	}
 
 	return data;
@@ -62,14 +64,18 @@ void Arena::train (std::vector<Example> examples) {
 	nn_b = nn_a->clone();
 	nn_a->feed(examples);
 	for (size_t i = 1; i < examples.size(); i++) {
-		std::cout << std::get<0>(examples[i])->to_string() << " -> " << std::get<2>(examples[i]) << std::endl;
-		std::cout << "result : " << std::get<0>(examples[i])->is_game_ended() << std::endl;
 		delete std::get<0>(examples[i]);
 	}
+	delete mcts_a;
+	delete mcts_b;
+	mcts_a = new MCTS(nn_a);
+	mcts_b = new MCTS(nn_b);
 }
 
 Arena::~Arena () {
 	delete nn_b;
 	delete nn_a;
 	delete g;
+	delete mcts_a;
+	delete mcts_b;
 }

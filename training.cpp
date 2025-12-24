@@ -10,17 +10,16 @@ int main () {
 	auto nn = new TicTacToeNN();
 	auto arena = new Arena(g, nn);
 
-	const size_t numEpisodes = 10;
+	const size_t numEpisodes = 10000;
 	for (size_t i = 0; i < numEpisodes; i++) {
-		auto exs = arena->episode(i % 2 == 0);
+		auto exs = arena->episode((i % 2 == 0) ? 1 : -1);
 		arena->train(exs);
 		std::cout << "episode " << i + 1 << "/" << numEpisodes << std::endl;
-		break;
 	}
 
 	torch::serialize::OutputArchive output;
 	arena->nn_a->save(output);
-	output.save_to("models/ttt_1000.pt");
+	output.save_to("models/ttt.pt");
 
 	delete arena;
 }

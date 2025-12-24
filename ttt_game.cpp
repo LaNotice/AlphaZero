@@ -35,12 +35,12 @@ double TicTacToeState::is_game_ended () {
 		if (board[a] == MARK::CIRCLE
 				&& board[b] == MARK::CIRCLE
 				&& board[c] == MARK::CIRCLE) {
-			return 1;
+			return 1.0;
 		}
 		if (board[a] == MARK::CROSS
 				&& board[b] == MARK::CROSS
 				&& board[c] == MARK::CROSS) {
-			return -1;
+			return -1.0;
 		}
 	}
 
@@ -50,7 +50,7 @@ double TicTacToeState::is_game_ended () {
 	}
 
 	if (moves_left) {
-		return 0;
+		return 0.0;
 	}
 
 	return 1e-4;

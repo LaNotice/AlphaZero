@@ -1,6 +1,7 @@
 #ifndef TTT_GAME
 #define TTT_GAME
 
+#include <iostream>
 #include <array>
 #include <cstddef>
 #include <string>

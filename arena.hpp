@@ -15,7 +15,7 @@ struct Arena {
 	MCTS* mcts_b;
 
 	Arena (Game* g, NeuralNetwork* a);
-	std::vector<Example> episode (bool starting_player = true);
+	std::vector<Example> episode (int starting_player = 1);
 	void train (std::vector<Example> data);
 	~Arena();
 };

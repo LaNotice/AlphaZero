@@ -4,6 +4,6 @@
 #include "ttt_play.hpp"
 
 int main () {
-	PlayTTT ttt("models/ttt_1000.pt");
+	PlayTTT ttt("models/ttt.pt");
 	ttt.run();
 }

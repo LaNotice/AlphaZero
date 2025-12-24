@@ -28,7 +28,8 @@ void PlayTTT::display () {
 		const Vector2 pos = { x * 250 + 175, y * 200 + 100 };	
 		switch (v) {
 			case MARK::CIRCLE:
-				DrawCircleLines(pos.x, pos.y, 50.0, BLUE);
+				DrawCircle(pos.x, pos.y, 50.0, BLUE); 
+				DrawCircle(pos.x, pos.y, 45.0, WHITE); 
 				break;
 			case MARK::CROSS:
 				DrawLineEx({

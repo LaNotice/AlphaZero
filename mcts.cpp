@@ -66,7 +66,7 @@ torch::Tensor MCTS::get_action_prob (Game* g, int temp) {
 }
 
 torch::Tensor MCTS::search (Game* g) {
-	double cpu_ct = 1;
+	double cpu_ct = 0.5;
 	std::string str = g->to_string();
 
 	if (game_ended.find(str) == game_ended.end()) {
