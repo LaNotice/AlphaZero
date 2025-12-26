@@ -6,13 +6,22 @@
 #include "arena.hpp"
 
 int main () {
-	auto g = new TicTacToeState();
 	auto nn = new TicTacToeNN();
-	auto arena = new Arena(g, nn);
+	auto arena = new Arena(nn);
 
-	const size_t numEpisodes = 10000;
+	nn->eval();
+	const size_t numEpisodes = 10;
+	const size_t numGames = 10;
 	for (size_t i = 0; i < numEpisodes; i++) {
-		auto exs = arena->episode((i % 2 == 0) ? 1 : -1);
+		auto g = new TicTacToeState();
+		std::vector<Example> exs;
+		for (size_t j = 0; j < numGames; j++) {
+			auto local_exs = arena->episode(g, (j % 2 == 0) ? 1 : -1);
+			exs.insert(exs.end(), local_exs.begin(), local_exs.end());
+			if (j % 10 == 0) {
+				std::cout << "games " << j << "/" << numGames << std::endl;
+			}
+		}
 		arena->train(exs);
 		std::cout << "episode " << i + 1 << "/" << numEpisodes << std::endl;
 	}

@@ -2,6 +2,7 @@
 #define TTT_NN
 
 #include <torch/torch.h>
+#include <cassert>
 #include <iostream>
 #include "neural_network.hpp"
 #include "ttt_game.hpp"

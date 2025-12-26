@@ -3,8 +3,10 @@
 
 #include <torch/torch.h>
 #include <map>
+#include <limits>
 #include <vector>
 #include <utility>
+#include <cassert>
 #include <cstddef>
 
 #include "game.hpp"
@@ -18,7 +20,7 @@ struct MCTS {
 	std::map<std::pair<GameString, size_t>, torch::Tensor> q_values;
 	std::map<std::pair<GameString, size_t>, int> times_edge_visited;
 	std::map<GameString, int> times_state_visited;
-	std::map<GameString, double> game_ended; 
+	std::map<GameString, float> game_ended; 
 	std::map<GameString, std::vector<float>> valid_moves;
 	std::map<GameString, torch::Tensor> policies;
 	NeuralNetwork* neural_network = nullptr;

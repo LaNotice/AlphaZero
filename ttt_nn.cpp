@@ -64,12 +64,27 @@ std::pair<torch::Tensor, torch::Tensor> TicTacToeNN::predict (Game* abstract) {
 	this->eval();
 
 	TicTacToeState* g = (TicTacToeState*)abstract;
+	std::array<float, 9> board_copy;
+	for (size_t i = 0; i < 9; i++) {
+		if (g->player == MARK::CROSS) {
+			board_copy[i] = static_cast<float>(g->board[i]) * -1.f;
+		} else {
+			board_copy[i] = static_cast<float>(g->board[i]);
+		}
+	}
 	auto x = torch::from_blob(
-				g->board.data(),
+				board_copy.data(),
 				{ 1, 3, 3 },
 				torch::kFloat32
 			).clone();
 
+	if (!torch::isfinite(x).all().item<bool>()) {
+		for (size_t i = 0; i < g->board.size(); i++) {
+			std::cout << (float)g->board[i] << std::endl;
+		}
+		std::cout << x << std::endl;
+		assert(torch::isfinite(x).all().item<bool>());
+	}
 	x = x.unsqueeze(1);
 	x = torch::relu(bn1(conv1(x)));
 	x = torch::relu(bn2(conv2(x)));

@@ -52,17 +52,21 @@ void PlayTTT::display () {
 
 void PlayTTT::input () {
 	if (IsKeyPressed(KEY_F)) {
-		std::cout << gstate->to_string() << std::endl;
-		std::cout << gstate << " " << mcts << " " << nn << std::endl;
 		auto pi = mcts->get_action_prob(gstate, 1);
-		std::cout << pi << std::endl;
 		int pick = pi.argmax().item<int>();
-		std::cout << "choice is " << pick << std::endl;
+		std::cout << "policy : " << pi << std::endl;
 		TicTacToeState* ns = dynamic_cast<TicTacToeState*>(gstate->get_next_state(pick));
 		delete gstate;
 		gstate = ns;
 	}
 
+	if (IsKeyPressed(KEY_R)) {
+		// reset
+		delete gstate;
+		delete mcts;
+		gstate = new TicTacToeState();
+		mcts = new MCTS(nn);
+	}
 	if (IsKeyPressed(KEY_Q)) {
 		// quit
 		quit = true;
