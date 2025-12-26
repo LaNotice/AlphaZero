@@ -41,7 +41,6 @@ std::vector<Example> Arena::episode (Game* game, int starting_player) {
 		auto new_v = torch::tensor({ z }, { torch::kFloat32 });
 		std::get<3>(data[i]) = new_v;
 	}
-
 	return data;
 }
 

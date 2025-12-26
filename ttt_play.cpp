@@ -60,6 +60,11 @@ void PlayTTT::input () {
 		gstate = ns;
 	}
 
+	if (IsKeyPressed(KEY_V)) {
+		auto [pi, v] = nn->predict(gstate);
+		std::cout << "policy vector " << pi << std::endl;
+		std::cout << "value vector " << v << std::endl;
+	}
 	if (IsKeyPressed(KEY_R)) {
 		// reset
 		delete gstate;

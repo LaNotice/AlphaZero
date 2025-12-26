@@ -37,7 +37,7 @@ TicTacToeNN::TicTacToeNN () {
 }
 
 void TicTacToeNN::feed (std::vector<Example> examples) {
-	const double learning_rate = 0.01;
+	const double learning_rate = 0.001;
 
 	torch::optim::Adam optimizer(
 		this->parameters(),

@@ -87,7 +87,7 @@ torch::Tensor MCTS::search (Game* g) {
 				{ 9 },
 				torch::kFloat32
 			).clone();
-		policies[str] = pi; // * pmoves;
+		policies[str] = pi * pmoves;
 		valid_moves[str] = possible_moves;
 		times_state_visited[str] = 0;
 		return -v;
