@@ -14,30 +14,32 @@ std::vector<Example> Arena::episode (Game* game, int starting_player) {
 	while (true) {
 		step++;
 		torch::Tensor pi;
+		int temp = 1;
 		if (starting_player == 1) {
-			pi = mcts_a->get_action_prob(game);
+			pi = mcts_a->get_action_prob(game, temp);
 		} else {
-			pi = mcts_b->get_action_prob(game);
+			pi = mcts_b->get_action_prob(game, temp);
 		}
 
 		data.push_back({
-					game, pi, torch::tensor({ 0.f }, { torch::kFloat32 })
+					game, starting_player, pi, torch::tensor({ 0 }, { torch::kFloat32 })
 				});
-		int pick = pi.argmax().item<int>();
+		int pick = torch::multinomial(pi, 1).item<int>();
 		Game* next_state = game->get_next_state(pick);
 		game = next_state;
 		starting_player *= -1;
-
 		if (game->is_game_ended() != 0.0) {
 			break;
 		}
 	}
-
-	double game_result = game->is_game_ended() * starting_player;
+	double game_result = game->is_game_ended();
 	for (size_t i = 0; i < data.size(); i++) {
-		float outcome = game_result * pow(-1, (i % 2 == 0) * starting_player);
-		auto new_v = torch::tensor({ outcome }, { torch::kFloat32 });
-		std::get<2>(data[i]) = new_v;
+		float z = ((int)game_result == std::get<1>(data[i])) ? 1.f : -1.f;
+		if (game_result == 0.0 || game_result == 1e-4) {
+			z = 0.f;
+		}
+		auto new_v = torch::tensor({ z }, { torch::kFloat32 });
+		std::get<3>(data[i]) = new_v;
 	}
 
 	return data;

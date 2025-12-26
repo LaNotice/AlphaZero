@@ -5,7 +5,7 @@
 #include <string>
 #include "game.hpp"
 
-using Example = std::tuple<Game*, torch::Tensor, torch::Tensor>;
+using Example = std::tuple<Game*, int, torch::Tensor, torch::Tensor>;
 
 struct NeuralNetwork : torch::nn::Module {
 	virtual void feed (std::vector<Example> examples) = 0;

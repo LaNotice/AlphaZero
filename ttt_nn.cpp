@@ -6,7 +6,7 @@ TicTacToeNN::TicTacToeNN () {
 	const int action_size = 9;
 	const int flat_size = action_size * n_chan;
 
-	conv1 = register_module("conv1", torch::nn::Conv2d(torch::nn::Conv2dOptions(1, n_chan, 3).padding(1)));
+	conv1 = register_module("conv1", torch::nn::Conv2d(torch::nn::Conv2dOptions(2, n_chan, 3).padding(1)));
 	bn1 = register_module("bn1", torch::nn::BatchNorm2d(n_chan));
 
 	conv2 = register_module("conv2", torch::nn::Conv2d(torch::nn::Conv2dOptions(n_chan, n_chan, 3).padding(1)));
@@ -37,7 +37,7 @@ TicTacToeNN::TicTacToeNN () {
 }
 
 void TicTacToeNN::feed (std::vector<Example> examples) {
-	const double learning_rate = 0.001;
+	const double learning_rate = 0.01;
 
 	torch::optim::Adam optimizer(
 		this->parameters(),
@@ -45,7 +45,7 @@ void TicTacToeNN::feed (std::vector<Example> examples) {
 	);
 
 	for (size_t i = 0; i < examples.size(); i++) {
-		auto [ game, target_pi, target_v ] = examples[i];
+		auto [ game, player, target_pi, target_v ] = examples[i];
 		auto [ pred_pi, pred_v ] = predict(game);
 
 		this->train();
@@ -64,17 +64,16 @@ std::pair<torch::Tensor, torch::Tensor> TicTacToeNN::predict (Game* abstract) {
 	this->eval();
 
 	TicTacToeState* g = (TicTacToeState*)abstract;
-	std::array<float, 9> board_copy;
+	std::array<float, 2 * 9> board_copy;
 	for (size_t i = 0; i < 9; i++) {
-		if (g->player == MARK::CROSS) {
-			board_copy[i] = -static_cast<float>(g->board[i]);
-		} else {
-			board_copy[i] = static_cast<float>(g->board[i]);
-		}
+		board_copy[i] = static_cast<float>(g->board[i]);
+	}
+	for (size_t i = 0; i < 9; i++) {
+		board_copy[i + 9] = static_cast<float>(g->player);
 	}
 	auto x = torch::from_blob(
 				board_copy.data(),
-				{ 1, 3, 3 },
+				{ 1, 2, 3, 3 },
 				torch::kFloat32
 			).clone();
 
@@ -85,7 +84,8 @@ std::pair<torch::Tensor, torch::Tensor> TicTacToeNN::predict (Game* abstract) {
 		std::cout << x << std::endl;
 		assert(torch::isfinite(x).all().item<bool>());
 	}
-	x = x.unsqueeze(1);
+
+//	x = x.unsqueeze(1);
 	x = torch::relu(bn1(conv1(x)));
 	x = torch::relu(bn2(conv2(x)));
 	x = torch::relu(bn3(conv3(x)));
