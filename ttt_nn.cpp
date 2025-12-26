@@ -67,7 +67,7 @@ std::pair<torch::Tensor, torch::Tensor> TicTacToeNN::predict (Game* abstract) {
 	std::array<float, 9> board_copy;
 	for (size_t i = 0; i < 9; i++) {
 		if (g->player == MARK::CROSS) {
-			board_copy[i] = static_cast<float>(g->board[i]) * -1.f;
+			board_copy[i] = -static_cast<float>(g->board[i]);
 		} else {
 			board_copy[i] = static_cast<float>(g->board[i]);
 		}

@@ -11,7 +11,7 @@ int main () {
 
 	nn->eval();
 	const size_t numEpisodes = 10;
-	const size_t numGames = 10;
+	const size_t numGames = 100;
 	for (size_t i = 0; i < numEpisodes; i++) {
 		auto g = new TicTacToeState();
 		std::vector<Example> exs;
