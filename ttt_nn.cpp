@@ -85,7 +85,6 @@ std::pair<torch::Tensor, torch::Tensor> TicTacToeNN::predict (Game* abstract) {
 		assert(torch::isfinite(x).all().item<bool>());
 	}
 
-//	x = x.unsqueeze(1);
 	x = torch::relu(bn1(conv1(x)));
 	x = torch::relu(bn2(conv2(x)));
 	x = torch::relu(bn3(conv3(x)));

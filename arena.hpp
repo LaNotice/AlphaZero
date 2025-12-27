@@ -17,6 +17,8 @@ struct Arena {
 	int awins = 0;
 	int bwins = 0;
 	int draws = 0;
+	int circle_win = 0;
+	int cross_win = 0;
 	Arena (NeuralNetwork* a);
 	std::vector<Example> episode (Game* g, int starting_player = 1);
 	void train (std::vector<Example> data);

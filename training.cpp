@@ -1,4 +1,6 @@
 #include <torch/torch.h>
+#include <algorithm>
+#include <random>
 #include <iostream>
 
 #include "ttt_game.hpp"
@@ -8,6 +10,7 @@
 int main () {
 	auto nn = new TicTacToeNN();
 	auto arena = new Arena(nn);
+	auto rng = std::default_random_engine {};
 
 	nn->eval();
 	const size_t numEpisodes = 20;
@@ -28,6 +31,7 @@ int main () {
 			std::cout.flush();
 		}
 		std::cout << std::endl;
+		std::shuffle(std::begin(exs), std::end(exs), rng);
 		arena->train(exs);
 	}
 

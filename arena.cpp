@@ -36,9 +36,12 @@ std::vector<Example> Arena::episode (Game* game, int starting_player) {
 	if (game_result == 0.0 || game_result == 1e-4) {
 		draws++;
 	} else if (game_result == -1.0) {
-		if (original_starter == 1) { bwins++; } else { awins++; }
+		if (original_starter == 1) { bwins++; }
+		else { awins++; }
+		cross_win++;
 	} else if (game_result == 1.0) {
 		if (original_starter == 1) { awins++; } else { bwins++; }
+		circle_win++;
 	}
 	for (size_t i = 0; i < data.size(); i++) {
 		float z = ((int)game_result == std::get<1>(data[i])) ? 1.f : -1.f;
@@ -78,8 +81,11 @@ void Arena::train (std::vector<Example> examples) {
 			nn_b = nn_a->clone();
 		}
 		nn_a->feed(examples);
+		last_train = 'A';
 	}
-
+	std::cout << "X wins " << cross_win << ", O wins " << circle_win << std::endl;
+	cross_win = 0;
+	circle_win = 0;
 	std::vector<Game*> deleted;
 	deleted.reserve(examples.size());
 	for (size_t i = 0; i < examples.size(); i++) {
