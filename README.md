@@ -11,3 +11,6 @@ cmake --build . --config Release
 ```
 
 run alphazero_training for training and alphazero for playing against the model
+
+# Note
+still doesn't work properly, work in progress
