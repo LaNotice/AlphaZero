@@ -10,8 +10,8 @@ int main () {
 	auto arena = new Arena(nn);
 
 	nn->eval();
-	const size_t numEpisodes = 100;
-	const size_t numGames = 100;
+	const size_t numEpisodes = 20;
+	const size_t numGames = 50;
 	for (size_t i = 0; i < numEpisodes; i++) {
 		auto g = new TicTacToeState();
 		std::vector<Example> exs;

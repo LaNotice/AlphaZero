@@ -13,6 +13,7 @@ struct Arena {
 	MCTS* mcts_a;
 	MCTS* mcts_b;
 
+	char last_train = 'A';
 	int awins = 0;
 	int bwins = 0;
 	int draws = 0;

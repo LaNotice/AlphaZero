@@ -59,15 +59,24 @@ void Arena::train (std::vector<Example> examples) {
 		delete nn_b;
 		nn_b = nn_a->clone();
 		nn_a->feed(examples);
+		last_train = 'A';
 	} else if (bwins > awins) {
 		// b better
 		std::cout << "B better by " << (float)bwins / (float)awins << std::endl;
 		delete nn_a;
 		nn_a = nn_b->clone();
 		nn_b->feed(examples);
+		last_train = 'B';
 	} else {
 		std::cout << "training rejected (" << awins << "/" << bwins << "/" << draws << ")" << std::endl;
 		// equals
+		if (last_train == 'A') {
+			delete nn_a;
+			nn_a = nn_b->clone();
+		} else {
+			delete nn_b;
+			nn_b = nn_a->clone();
+		}
 		nn_a->feed(examples);
 	}
 
