@@ -33,6 +33,13 @@ std::vector<Example> Arena::episode (Game* game, int starting_player) {
 		}
 	}
 	double game_result = game->is_game_ended();
+	if (game_result == 0.0 || game_result == 1e-4) {
+		draws++;
+	} else if (game_result == -1.0) {
+		if (original_starter == 1) { bwins++; } else { awins++; }
+	} else if (game_result == 1.0) {
+		if (original_starter == 1) { awins++; } else { bwins++; }
+	}
 	for (size_t i = 0; i < data.size(); i++) {
 		float z = ((int)game_result == std::get<1>(data[i])) ? 1.f : -1.f;
 		if (game_result == 0.0 || game_result == 1e-4) {
@@ -45,9 +52,25 @@ std::vector<Example> Arena::episode (Game* game, int starting_player) {
 }
 
 void Arena::train (std::vector<Example> examples) {
-	delete nn_b;
-	nn_b = nn_a->clone();
-	nn_a->feed(examples);
+	float total = awins + bwins + draws;
+	if (awins > bwins) {
+		// a better
+		std::cout << "A better by " << (float)awins / (float)bwins << std::endl;
+		delete nn_b;
+		nn_b = nn_a->clone();
+		nn_a->feed(examples);
+	} else if (bwins > awins) {
+		// b better
+		std::cout << "B better by " << (float)bwins / (float)awins << std::endl;
+		delete nn_a;
+		nn_a = nn_b->clone();
+		nn_b->feed(examples);
+	} else {
+		std::cout << "training rejected (" << awins << "/" << bwins << "/" << draws << ")" << std::endl;
+		// equals
+		nn_a->feed(examples);
+	}
+
 	std::vector<Game*> deleted;
 	deleted.reserve(examples.size());
 	for (size_t i = 0; i < examples.size(); i++) {
@@ -61,6 +84,9 @@ void Arena::train (std::vector<Example> examples) {
 	delete mcts_b;
 	mcts_a = new MCTS(nn_a);
 	mcts_b = new MCTS(nn_b);
+	awins = 0;
+	bwins = 0;
+	draws = 0;
 }
 
 Arena::~Arena () {

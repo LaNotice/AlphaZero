@@ -20,11 +20,11 @@ int main () {
 			auto local_exs = arena->episode(g, (j % 2 == 1) ? 1 : -1);
 			exs.insert(exs.end(), local_exs.begin(), local_exs.end());
 			std::cout << "[";
-			for (size_t k = 0; k < numGames; k++) {
-				if (k < j) { std::cout << "="; }
+			for (size_t k = 0; k <= numGames; k++) {
+				if (k <= j) { std::cout << "="; }
 				else { std::cout << " "; }
 			}
-			std::cout << "] " << j << "%\r";
+			std::cout << "] " << ((float)(j + 1) / (float)numGames) * 100 << "%\r";
 			std::cout.flush();
 		}
 		std::cout << std::endl;

@@ -13,6 +13,9 @@ struct Arena {
 	MCTS* mcts_a;
 	MCTS* mcts_b;
 
+	int awins = 0;
+	int bwins = 0;
+	int draws = 0;
 	Arena (NeuralNetwork* a);
 	std::vector<Example> episode (Game* g, int starting_player = 1);
 	void train (std::vector<Example> data);
