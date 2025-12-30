@@ -5,7 +5,7 @@ MCTS::MCTS (NeuralNetwork* nnet) {
 }
 
 torch::Tensor MCTS::get_action_prob (Game* g, int temp) {
-	const int num_sims = 100;
+	const int num_sims = 25;
 
 	for (size_t i = 0; i < num_sims; i++) {
 		search(g);
@@ -90,6 +90,11 @@ torch::Tensor MCTS::search (Game* g) {
 		policies[str] = pi * pmoves;
 		valid_moves[str] = possible_moves;
 		times_state_visited[str] = 0;
+		if (policies[str].sum().item<float>() > 0.f) {
+			policies[str] /= policies[str].sum();
+		} else {
+			std::cout << "all legal moves were masked" << std::endl;
+		}
 		return -v;
 	}
 

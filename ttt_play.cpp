@@ -62,8 +62,21 @@ void PlayTTT::input () {
 
 	if (IsKeyPressed(KEY_V)) {
 		auto [pi, v] = nn->predict(gstate);
+		std::cout << "board state\n" << gstate->to_string() << std::endl;
 		std::cout << "policy vector " << pi << std::endl;
 		std::cout << "value vector " << v << std::endl;
+		std::cout << "OPTIONS" << std::endl;
+		auto moves = gstate->get_possible_moves();
+		for (size_t i = 0; i < moves.size(); i++) {
+			if (moves[i] > 0.f) {
+				TicTacToeState* simulation = dynamic_cast<TicTacToeState*>(gstate->get_next_state(i));
+				auto [ spi, sv ] = nn->predict(simulation);
+				std::cout << "move " << i + 1 << ": value " << sv << std::endl;
+				delete simulation;
+			} else {
+				std::cout << "move " << i + 1 << ": IMPOSSIBLE" << std::endl;
+			}
+		}
 	}
 	if (IsKeyPressed(KEY_R)) {
 		// reset
