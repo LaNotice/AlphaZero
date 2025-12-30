@@ -58,15 +58,16 @@ std::vector<Example> Arena::episode (Game* game, int starting_player) {
 }
 
 void Arena::train (std::vector<Example> examples) {
-	float total = awins + bwins + draws;
-	if (awins > bwins) {
+	const float threshold = 1.25;
+	const float total = awins + bwins + draws;
+	if ((awins / bwins) >= threshold) {
 		// a better
 		std::cout << "A better by " << (float)awins / (float)bwins << std::endl;
 		delete nn_b;
 		nn_b = nn_a->clone();
 		nn_a->feed(examples);
 		last_train = 'A';
-	} else if (bwins > awins) {
+	} else if ((bwins / awins) >= threshold) {
 		// b better
 		std::cout << "B better by " << (float)bwins / (float)awins << std::endl;
 		delete nn_a;
@@ -86,8 +87,8 @@ void Arena::train (std::vector<Example> examples) {
 		nn_a->feed(examples);
 		last_train = 'A';
 	}
-	std::cout << "X wins " << cross_win << ", O wins " << circle_win << std::endl;
-	
+	std::cout << "X wins " << cross_win << ", O wins " << circle_win <<  ", draws " << draws << std::endl;
+
 	cross_win = 0;
 	circle_win = 0;
 	awins = 0;
@@ -95,6 +96,7 @@ void Arena::train (std::vector<Example> examples) {
 	draws = 0;
 	std::vector<Game*> deleted;
 	deleted.reserve(examples.size());
+	// slow
 	for (size_t i = 0; i < examples.size(); i++) {
 		auto ptr = std::get<0>(examples[i]);
 		if (std::find(deleted.begin(), deleted.end(), ptr) == deleted.end()) {

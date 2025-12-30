@@ -14,8 +14,8 @@ int main () {
 	auto rng = std::default_random_engine {};
 
 	nn->eval();
-	const size_t numEpisodes = 20;
-	const size_t numGames = 50;
+	const size_t numEpisodes = 100;
+	const size_t numGames = 100;
 	for (size_t i = 0; i < numEpisodes; i++) {
 		auto g = new TicTacToeState();
 		std::vector<Example> exs;
@@ -42,7 +42,11 @@ int main () {
 	}
 
 	torch::serialize::OutputArchive output;
-	arena->nn_a->save(output);
+	if (arena->last_train == 'A') {
+		arena->nn_a->save(output);
+	} else {
+		arena->nn_b->save(output);
+	}
 	output.save_to("models/ttt.pt");
 
 	delete arena;
