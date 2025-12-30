@@ -1,6 +1,7 @@
 #include <torch/torch.h>
 #include <algorithm>
 #include <random>
+#include <future>
 #include <iostream>
 
 #include "ttt_game.hpp"
@@ -18,9 +19,14 @@ int main () {
 	for (size_t i = 0; i < numEpisodes; i++) {
 		auto g = new TicTacToeState();
 		std::vector<Example> exs;
+		std::array<std::future<std::vector<Example>>, numGames> futures;
 		std::cout << "episode " << i + 1 << "/" << numEpisodes << std::endl;
 		for (size_t j = 0; j < numGames; j++) {
-			auto local_exs = arena->episode(g, (j % 2 == 1) ? 1 : -1);
+			futures[j] = std::async(&Arena::episode, arena, g, (j % 2 == 0) ? 1 : -1);
+		}
+		for (size_t j = 0; j < numGames; j++) {
+			futures[j].wait();
+			auto local_exs = futures[j].get();
 			exs.insert(exs.end(), local_exs.begin(), local_exs.end());
 			std::cout << "[";
 			for (size_t k = 0; k <= numGames; k++) {

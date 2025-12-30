@@ -3,18 +3,19 @@
 Arena::Arena (NeuralNetwork* a) {
 	nn_a = a;
 	nn_b = a->clone();
-	mcts_a = new MCTS(nn_a);
-	mcts_b = new MCTS(nn_b);
 }
 
 std::vector<Example> Arena::episode (Game* game, int starting_player) {
 	std::vector<Example> data;
+	MCTS* mcts_a = new MCTS(nn_a);
+	MCTS* mcts_b = new MCTS(nn_b);
 	int original_starter = starting_player;
 	int step = 0;
 	while (true) {
 		step++;
 		torch::Tensor pi;
 		int temp = 1;
+		if (step > 3) { temp = 0; }
 		if (starting_player == 1) {
 			pi = mcts_a->get_action_prob(game, temp);
 		} else {
@@ -51,6 +52,8 @@ std::vector<Example> Arena::episode (Game* game, int starting_player) {
 		auto new_v = torch::tensor({ z }, { torch::kFloat32 });
 		std::get<3>(data[i]) = new_v;
 	}
+	delete mcts_a;
+	delete mcts_b;
 	return data;
 }
 
@@ -84,8 +87,12 @@ void Arena::train (std::vector<Example> examples) {
 		last_train = 'A';
 	}
 	std::cout << "X wins " << cross_win << ", O wins " << circle_win << std::endl;
+	
 	cross_win = 0;
 	circle_win = 0;
+	awins = 0;
+	bwins = 0;
+	draws = 0;
 	std::vector<Game*> deleted;
 	deleted.reserve(examples.size());
 	for (size_t i = 0; i < examples.size(); i++) {
@@ -95,18 +102,9 @@ void Arena::train (std::vector<Example> examples) {
 			delete ptr;
 		}
 	}
-	delete mcts_a;
-	delete mcts_b;
-	mcts_a = new MCTS(nn_a);
-	mcts_b = new MCTS(nn_b);
-	awins = 0;
-	bwins = 0;
-	draws = 0;
 }
 
 Arena::~Arena () {
 	delete nn_b;
 	delete nn_a;
-	delete mcts_a;
-	delete mcts_b;
 }

@@ -10,8 +10,6 @@
 struct Arena {
 	NeuralNetwork* nn_b;
 	NeuralNetwork* nn_a;
-	MCTS* mcts_a;
-	MCTS* mcts_b;
 
 	char last_train = 'A';
 	int awins = 0;
